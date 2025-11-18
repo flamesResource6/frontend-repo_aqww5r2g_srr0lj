@@ -1,28 +1,41 @@
 import { useState } from 'react'
 
 export default function Login({ onLogin }) {
-  const [email, setEmail] = useState('admin@example.com')
-  const [password, setPassword] = useState('admin123')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
+
+  const safeFetchJSON = async (url, options) => {
+    const res = await fetch(url, options)
+    let bodyText = ''
+    try { bodyText = await res.text() } catch {}
+    let data
+    try { data = bodyText ? JSON.parse(bodyText) : {} } catch { data = { detail: bodyText || 'Request failed' } }
+    if (!res.ok) {
+      const msg = (data && (data.detail || data.message)) || bodyText || 'Request failed'
+      throw new Error(typeof msg === 'string' ? msg : JSON.stringify(msg))
+    }
+    return data
+  }
 
   const submit = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError('')
     try {
-      const form = new URLSearchParams()
-      form.append('username', email)
-      form.append('password', password)
-      const res = await fetch(`${baseUrl}/auth/token`, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: form })
-      if (!res.ok) throw new Error('Invalid credentials')
-      const data = await res.json()
+      const payload = { email: (email || '').trim().toLowerCase(), password: password || '' }
+      const data = await safeFetchJSON(`${baseUrl}/auth/token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
       localStorage.setItem('token', data.access_token)
       onLogin(data.access_token)
     } catch (err) {
-      setError(err.message)
+      setError(err.message || 'Login failed')
     } finally {
       setLoading(false)
     }
@@ -32,19 +45,16 @@ export default function Login({ onLogin }) {
     setLoading(true)
     setError('')
     try {
-      const form = new URLSearchParams()
-      form.append('username', email)
-      form.append('password', password)
-      const res = await fetch(`${baseUrl}/auth/register`, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: form })
-      if (!res.ok) {
-        const t = await res.text();
-        throw new Error(t || 'Registration failed')
-      }
-      const data = await res.json()
+      const payload = { email: (email || '').trim().toLowerCase(), password: password || '' }
+      const data = await safeFetchJSON(`${baseUrl}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
       localStorage.setItem('token', data.access_token)
       onLogin(data.access_token)
     } catch (err) {
-      setError(err.message)
+      setError(err.message || 'Registration failed')
     } finally {
       setLoading(false)
     }
