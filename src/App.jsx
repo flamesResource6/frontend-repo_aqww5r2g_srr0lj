@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import Login from './components/Login'
 import POS from './components/POS'
 import ProductManager from './components/ProductManager'
+import Settings from './components/Settings'
+import Reports from './components/Reports'
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '')
@@ -53,11 +55,15 @@ function App() {
           <div className="flex items-center gap-2">
             <button onClick={() => setTab('pos')} className={`px-3 py-2 rounded ${tab==='pos'?'bg-white/20':'bg-white/10'}`}>POS</button>
             <button onClick={() => setTab('products')} className={`px-3 py-2 rounded ${tab==='products'?'bg-white/20':'bg-white/10'}`}>Products</button>
+            <button onClick={() => setTab('reports')} className={`px-3 py-2 rounded ${tab==='reports'?'bg-white/20':'bg-white/10'}`}>Reports</button>
+            <button onClick={() => setTab('settings')} className={`px-3 py-2 rounded ${tab==='settings'?'bg-white/20':'bg-white/10'}`}>Settings</button>
             <button onClick={() => { localStorage.removeItem('token'); location.reload() }} className="px-4 py-2 rounded bg-white/10 border border-white/20 hover:bg-white/20">Logout</button>
           </div>
         </div>
         {tab === 'pos' && <POS />}
         {tab === 'products' && <ProductManager />}
+        {tab === 'reports' && <Reports />}
+        {tab === 'settings' && <Settings />}
       </div>
     </div>
   )
