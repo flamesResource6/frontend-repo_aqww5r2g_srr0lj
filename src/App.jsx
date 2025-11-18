@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import Login from './components/Login'
 import POS from './components/POS'
+import ProductManager from './components/ProductManager'
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '')
   const [stats, setStats] = useState({ today_total: 0, transactions: 0, items_sold: 0 })
+  const [tab, setTab] = useState('pos')
 
   const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
 
@@ -48,9 +50,14 @@ function App() {
             <h1 className="text-3xl font-black">Supermarket POS</h1>
             <p className="text-white/60 text-sm">Today: ${stats.today_total?.toFixed(2) || '0.00'} • Txns: {stats.transactions} • Items: {stats.items_sold}</p>
           </div>
-          <button onClick={() => { localStorage.removeItem('token'); location.reload() }} className="px-4 py-2 rounded bg-white/10 border border-white/20 hover:bg-white/20">Logout</button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setTab('pos')} className={`px-3 py-2 rounded ${tab==='pos'?'bg-white/20':'bg-white/10'}`}>POS</button>
+            <button onClick={() => setTab('products')} className={`px-3 py-2 rounded ${tab==='products'?'bg-white/20':'bg-white/10'}`}>Products</button>
+            <button onClick={() => { localStorage.removeItem('token'); location.reload() }} className="px-4 py-2 rounded bg-white/10 border border-white/20 hover:bg-white/20">Logout</button>
+          </div>
         </div>
-        <POS />
+        {tab === 'pos' && <POS />}
+        {tab === 'products' && <ProductManager />}
       </div>
     </div>
   )
